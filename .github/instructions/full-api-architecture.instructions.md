@@ -14,6 +14,7 @@ This repository is the staged `.NET` replacement for the Budgetin Check BFF.
   - infrastructure for auth and database access
   - a proxy to the legacy Next.js BFF for unmigrated routes
 - The sibling `budget-app` repository still contains the legacy Next.js BFF implementation being replaced.
+- The current production deployment still runs on the Next.js/Vercel backend, not this `.NET` API.
 
 ## Runtime Shape
 
@@ -27,6 +28,7 @@ This repository is the staged `.NET` replacement for the Budgetin Check BFF.
 - Some routes are implemented natively in C#.
 - Remaining BFF routes are forwarded through `LegacyProxyEndpoints`.
 - The proxy is a migration tool, not the target architecture.
+- Local parity with the live Next.js BFF matters more than theoretical architectural purity while migration is incomplete.
 
 ## Current Native Route Areas
 
@@ -62,6 +64,7 @@ When adding new native behavior, prefer expanding feature-local C# modules over 
 - `Infrastructure/Legacy/LegacyBffClient.cs` is the bridge to the old Next.js server.
 - `LegacyNextJs:BaseUrl` must be configured for proxy-backed behavior.
 - If a route is not fully ported, keep the proxy path working instead of partially breaking compatibility.
+- The expected local legacy backend target is the current Next.js dev server at `http://localhost:5537`.
 
 ## Feature Layout
 
@@ -78,15 +81,20 @@ When porting a BFF route from Next.js to C#:
 3. Preserve pay-period and finance behavior rather than simplifying it.
 4. Prefer a small, testable native route slice over a partial broad rewrite.
 5. Leave the legacy proxy in place for unaffected routes.
+6. When the Next.js BFF changes first, update the `.NET` implementation or parity placeholder in the same development cycle.
 
 ## Configuration
 
 - `ConnectionStrings:BudgetDb` or `DATABASE_URL`: PostgreSQL connection string.
 - `LegacyNextJs:BaseUrl`: target for unmigrated BFF proxying and the current auth bridge.
 - `BudgetData:SpendingDataRoot`: path to legacy spending JSON data used by some native summary logic.
+- Default local URLs currently are:
+  - Next.js BFF: `http://localhost:5537`
+  - `.NET` API: `http://localhost:5262`
 
 ## Validation Expectations
 
 - Use `~/.dotnet/dotnet build ./src/BudgetinCheck.Api/BudgetinCheck.Api.csproj --nologo -v minimal` as the default focused validation.
 - If a task changes routing or feature registration, validate through the API host entrypoint.
 - If a task changes a summary or contract, call out what is now native versus what still depends on the legacy proxy.
+- If the change started in the Next.js BFF, explicitly state whether parity in this repo was updated too.

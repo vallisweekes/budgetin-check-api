@@ -16,6 +16,8 @@ This repository is the `.NET` backend migration target for Budgetin Check.
 - Preserve compatibility with existing mobile and web consumers while migration is in progress.
 - Prefer porting behavior natively to C# instead of deepening dependency on the legacy proxy.
 - Keep auth, budget-plan ownership checks, and response-shape discipline intact while migrating endpoints.
+- When the current Next.js BFF changes in the sibling `budget-app` repo, keep the corresponding `.NET` route behavior or migration placeholder updated here as part of the same workflow.
+- Production deployment assumptions still belong to the Next.js/Vercel backend until this API is actually deployed and ready.
 
 ## How The API Works Today
 
@@ -36,6 +38,7 @@ This repository is the `.NET` backend migration target for Budgetin Check.
   - low-complexity read endpoints
   - higher-risk summary and mutation flows
 - Do not remove the legacy proxy for a route until the native implementation is functionally ready.
+- During local development, treat parity with the current Next.js BFF as a required part of server work, not optional follow-up.
 
 ## Data And Configuration Rules
 
@@ -43,6 +46,9 @@ This repository is the `.NET` backend migration target for Budgetin Check.
 - `LegacyNextJs:BaseUrl` points to the legacy Next.js BFF host used for fallback proxying.
 - `BudgetData:SpendingDataRoot` points to legacy spending JSON data when a native endpoint still depends on it.
 - Keep configuration names stable unless there is a deliberate migration plan.
+- Local backend switching currently depends on:
+  - Next.js BFF at `http://localhost:5537`
+  - `.NET` API at `http://localhost:5262`
 
 ## Coding Expectations
 
@@ -57,3 +63,4 @@ This repository is the `.NET` backend migration target for Budgetin Check.
 - Prefer `cd /Users/shakerhd/Documents/Developer/budgetin-check-api && ~/.dotnet/dotnet build ./src/BudgetinCheck.Api/BudgetinCheck.Api.csproj --nologo -v minimal` after changes.
 - If routing or endpoint behavior changes, run the narrowest practical validation first.
 - Call out any remaining dependency on the legacy proxy in the final summary.
+- Call out whether a related Next.js BFF change also needs to be mirrored or was already mirrored in the sibling `budget-app` repo.

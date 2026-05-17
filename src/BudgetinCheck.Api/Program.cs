@@ -6,10 +6,15 @@ using BudgetinCheck.Api.Features.Subscription;
 using BudgetinCheck.Api.Infrastructure.Auth;
 using BudgetinCheck.Api.Infrastructure.Configuration;
 using BudgetinCheck.Api.Infrastructure.Data;
+using BudgetinCheck.Api.Infrastructure.Development;
 using BudgetinCheck.Api.Infrastructure.Legacy;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+DevelopmentEnvironmentConfiguration.ApplyBudgetAppDatabaseFallback(
+    builder.Configuration,
+    builder.Environment);
 
 builder.Services.Configure<LegacyNextJsOptions>(builder.Configuration.GetSection(LegacyNextJsOptions.SectionName));
 builder.Services.Configure<BudgetDataOptions>(builder.Configuration.GetSection(BudgetDataOptions.SectionName));

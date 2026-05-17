@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{588783A4-02D6-439D-A2CC-8DA2EBDB8516}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetinCheck.Api", "src\BudgetinCheck.Api\BudgetinCheck.Api.csproj", "{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E0C6D6D8-1FF7-4018-A332-0812B5E4D59C} = {588783A4-02D6-439D-A2CC-8DA2EBDB8516}
+	EndGlobalSection
+EndGlobal

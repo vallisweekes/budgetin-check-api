@@ -1,0 +1,8 @@
+{
+  "dotnet.defaultSolution": "BudgetinCheck.sln",
+  "omnisharp.sdkPath": "${env:HOME}/.dotnet",
+  "terminal.integrated.env.osx": {
+    "DOTNET_ROOT": "${env:HOME}/.dotnet",
+    "PATH": "${env:HOME}/.dotnet:${env:PATH}"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BudgetinCheck.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/BudgetinCheck.Api/bin/Debug/net8.0/BudgetinCheck.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/BudgetinCheck.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ROOT": "${env:HOME}/.dotnet",
+        "PATH": "${env:HOME}/.dotnet:${env:PATH}"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    }
+  ]
+}

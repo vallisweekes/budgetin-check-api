@@ -1,0 +1,199 @@
+trigger:
+  branches:
+    include:
+      - dev
+      - main
+
+pr:
+  branches:
+    include:
+      - dev
+      - main
+
+variables:
+  azureServiceConnection: sc-budgetin-check-api-azure
+  azureLocation: uksouth
+  dotNetSdkVersion: 8.x
+  buildConfiguration: Release
+  projectPath: src/BudgetinCheck.Api/BudgetinCheck.Api.csproj
+  dockerfilePath: src/BudgetinCheck.Api/Dockerfile
+  dockerBuildContext: .
+  imageRepository: budgetin-check-api
+  containerPort: 8080
+
+  containerRegistryResourceGroupName: rg-budgetin-check-api-shared
+  containerRegistryName: crbudgetincheckapi
+  containerRegistryLoginServer: crbudgetincheckapi.azurecr.io
+  containerRegistrySku: Basic
+
+  nonProdResourceGroupName: rg-budgetin-check-api-nonprod
+  nonProdAppServicePlanName: asp-budgetin-check-api-nonprod
+  nonProdWebAppName: app-budgetin-check-api-nonprod
+  nonProdAppServicePlanSku: B1
+  nonProdImageTag: nonprod-$(Build.BuildId)
+
+  prodResourceGroupName: rg-budgetin-check-api-prod
+  prodAppServicePlanName: asp-budgetin-check-api-prod
+  prodWebAppName: app-budgetin-check-api-prod
+  prodAppServicePlanSku: B1
+  prodImageTag: prod-$(Build.BuildId)
+
+stages:
+  - stage: Validate
+    displayName: Validate API
+    jobs:
+      - job: DotNetBuild
+        displayName: Restore and build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            displayName: Use .NET SDK $(dotNetSdkVersion)
+            inputs:
+              packageType: sdk
+              version: $(dotNetSdkVersion)
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: BudgetinCheck.sln
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: build
+              projects: BudgetinCheck.sln
+              arguments: --configuration $(buildConfiguration) --no-restore
+
+  - stage: Build_NonProd
+    displayName: Build non-prod container
+    dependsOn: Validate
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+    jobs:
+      - job: BuildNonProdImage
+        displayName: Build and push non-prod image
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/build-and-push-container.yml
+            parameters:
+              azureServiceConnection: $(azureServiceConnection)
+              azureLocation: $(azureLocation)
+              containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
+              containerRegistryName: $(containerRegistryName)
+              containerRegistrySku: $(containerRegistrySku)
+              imageRepository: $(imageRepository)
+              imageTag: $(nonProdImageTag)
+              latestTag: nonprod-latest
+              dockerfilePath: $(dockerfilePath)
+              dockerBuildContext: $(dockerBuildContext)
+
+  - stage: Deploy_NonProd
+    displayName: Deploy non-prod
+    dependsOn: Build_NonProd
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+    variables:
+      - group: budgetin-check-api-nonprod
+      - name: resourceGroupName
+        value: $(nonProdResourceGroupName)
+      - name: appServicePlanName
+        value: $(nonProdAppServicePlanName)
+      - name: webAppName
+        value: $(nonProdWebAppName)
+      - name: appServicePlanSku
+        value: $(nonProdAppServicePlanSku)
+      - name: containerImage
+        value: $(containerRegistryLoginServer)/$(imageRepository):$(nonProdImageTag)
+      - name: aspNetCoreEnvironment
+        value: Development
+    jobs:
+      - deployment: DeployNonProd
+        displayName: Deploy non-prod Web App for Containers
+        environment: budgetin-check-api-nonprod
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/provision-container-webapp.yml
+                  parameters:
+                    azureServiceConnection: $(azureServiceConnection)
+                    azureLocation: $(azureLocation)
+                    containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
+                    containerRegistryName: $(containerRegistryName)
+                    containerRegistryLoginServer: $(containerRegistryLoginServer)
+                    resourceGroupName: $(resourceGroupName)
+                    appServicePlanName: $(appServicePlanName)
+                    appServicePlanSku: $(appServicePlanSku)
+                    webAppName: $(webAppName)
+                    containerImage: $(containerImage)
+                    containerPort: $(containerPort)
+                    aspNetCoreEnvironment: $(aspNetCoreEnvironment)
+
+  - stage: Build_Prod
+    displayName: Build prod container
+    dependsOn: Validate
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: BuildProdImage
+        displayName: Build and push prod image
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - template: templates/build-and-push-container.yml
+            parameters:
+              azureServiceConnection: $(azureServiceConnection)
+              azureLocation: $(azureLocation)
+              containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
+              containerRegistryName: $(containerRegistryName)
+              containerRegistrySku: $(containerRegistrySku)
+              imageRepository: $(imageRepository)
+              imageTag: $(prodImageTag)
+              latestTag: prod-latest
+              dockerfilePath: $(dockerfilePath)
+              dockerBuildContext: $(dockerBuildContext)
+
+  - stage: Deploy_Prod
+    displayName: Deploy prod
+    dependsOn: Build_Prod
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      - group: budgetin-check-api-prod
+      - name: resourceGroupName
+        value: $(prodResourceGroupName)
+      - name: appServicePlanName
+        value: $(prodAppServicePlanName)
+      - name: webAppName
+        value: $(prodWebAppName)
+      - name: appServicePlanSku
+        value: $(prodAppServicePlanSku)
+      - name: containerImage
+        value: $(containerRegistryLoginServer)/$(imageRepository):$(prodImageTag)
+      - name: aspNetCoreEnvironment
+        value: Production
+    jobs:
+      - deployment: DeployProd
+        displayName: Deploy prod Web App for Containers
+        environment: budgetin-check-api-prod
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/provision-container-webapp.yml
+                  parameters:
+                    azureServiceConnection: $(azureServiceConnection)
+                    azureLocation: $(azureLocation)
+                    containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
+                    containerRegistryName: $(containerRegistryName)
+                    containerRegistryLoginServer: $(containerRegistryLoginServer)
+                    resourceGroupName: $(resourceGroupName)
+                    appServicePlanName: $(appServicePlanName)
+                    appServicePlanSku: $(appServicePlanSku)
+                    webAppName: $(webAppName)
+                    containerImage: $(containerImage)
+                    containerPort: $(containerPort)
+                    aspNetCoreEnvironment: $(aspNetCoreEnvironment)

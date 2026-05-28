@@ -1,0 +1,106 @@
+parameters:
+  azureServiceConnection: ''
+  azureLocation: ''
+  containerRegistryResourceGroupName: ''
+  containerRegistryName: ''
+  containerRegistryLoginServer: ''
+  resourceGroupName: ''
+  appServicePlanName: ''
+  appServicePlanSku: ''
+  webAppName: ''
+  containerImage: ''
+  containerPort: ''
+  aspNetCoreEnvironment: ''
+
+steps:
+  - task: AzureCLI@2
+    displayName: Provision and deploy container Web App
+    inputs:
+      azureSubscription: ${{ parameters.azureServiceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+
+        resource_group='${{ parameters.resourceGroupName }}'
+        location='${{ parameters.azureLocation }}'
+        app_service_plan='${{ parameters.appServicePlanName }}'
+        app_service_plan_sku='${{ parameters.appServicePlanSku }}'
+        web_app='${{ parameters.webAppName }}'
+        registry_group='${{ parameters.containerRegistryResourceGroupName }}'
+        registry='${{ parameters.containerRegistryName }}'
+        registry_login_server='${{ parameters.containerRegistryLoginServer }}'
+        container_image='${{ parameters.containerImage }}'
+        container_port='${{ parameters.containerPort }}'
+        aspnetcore_environment='${{ parameters.aspNetCoreEnvironment }}'
+
+        az group create \
+          --name "$resource_group" \
+          --location "$location"
+
+        if ! az appservice plan show --resource-group "$resource_group" --name "$app_service_plan" >/dev/null 2>&1; then
+          az appservice plan create \
+            --name "$app_service_plan" \
+            --resource-group "$resource_group" \
+            --location "$location" \
+            --is-linux \
+            --sku "$app_service_plan_sku"
+        fi
+
+        if ! az webapp show --resource-group "$resource_group" --name "$web_app" >/dev/null 2>&1; then
+          az webapp create \
+            --name "$web_app" \
+            --resource-group "$resource_group" \
+            --plan "$app_service_plan" \
+            --deployment-container-image-name "$container_image"
+        fi
+
+        principal_id=$(az webapp identity assign \
+          --resource-group "$resource_group" \
+          --name "$web_app" \
+          --query principalId \
+          -o tsv)
+
+        registry_id=$(az acr show \
+          --resource-group "$registry_group" \
+          --name "$registry" \
+          --query id \
+          -o tsv)
+
+        az role assignment create \
+          --assignee-object-id "$principal_id" \
+          --assignee-principal-type ServicePrincipal \
+          --role AcrPull \
+          --scope "$registry_id" >/dev/null 2>&1 || true
+
+        az webapp config set \
+          --resource-group "$resource_group" \
+          --name "$web_app" \
+          --generic-configurations '{"acrUseManagedIdentityCreds": true}'
+
+        az webapp config container set \
+          --resource-group "$resource_group" \
+          --name "$web_app" \
+          --container-image-name "$container_image" \
+          --container-registry-url "https://$registry_login_server"
+
+        az webapp config appsettings set \
+          --resource-group "$resource_group" \
+          --name "$web_app" \
+          --settings \
+            ASPNETCORE_ENVIRONMENT="$aspnetcore_environment" \
+            ASPNETCORE_URLS="http://+:$container_port" \
+            WEBSITES_PORT="$container_port" \
+            ConnectionStrings__BudgetDb="$BUDGET_DB_CONNECTION_STRING" \
+            LegacyNextJs__BaseUrl="$LEGACY_NEXTJS_BASE_URL" \
+            LegacyNextJs__TimeoutSeconds="$LEGACY_NEXTJS_TIMEOUT_SECONDS" \
+            BudgetData__SpendingDataRoot="$BUDGET_DATA_SPENDING_DATA_ROOT"
+
+        az webapp restart \
+          --resource-group "$resource_group" \
+          --name "$web_app"
+    env:
+      BUDGET_DB_CONNECTION_STRING: $(BudgetDbConnectionString)
+      LEGACY_NEXTJS_BASE_URL: $(LegacyNextJsBaseUrl)
+      LEGACY_NEXTJS_TIMEOUT_SECONDS: $(LegacyNextJsTimeoutSeconds)
+      BUDGET_DATA_SPENDING_DATA_ROOT: $(BudgetDataSpendingDataRoot)

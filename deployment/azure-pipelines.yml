@@ -22,7 +22,7 @@ variables:
 
   containerRegistrySku: Basic
 
-  nonProdAzureServiceConnection: sc-budgetin-check-api-azure-dev
+  nonProdAzureServiceConnection: sc-budgetin-check-api-azure
   nonProdResourceGroupName: rg-vw-budgetapp-api-dev-uks-001
   nonProdContainerRegistryResourceGroupName: $(nonProdResourceGroupName)
   nonProdContainerRegistryName: crvwbudgetappapidevuks001

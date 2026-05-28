@@ -74,7 +74,7 @@ Prod:
 
 Shared pipeline requirements:
 
-- Non-prod Azure DevOps service connection: `sc-budgetin-check-api-azure-dev`
+- Non-prod Azure DevOps service connection: `sc-budgetin-check-api-azure`
 - Prod Azure DevOps service connection: `sc-budgetin-check-api-azure-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
@@ -112,7 +112,8 @@ Created `deployment/azure-pipelines.yml` with these stages:
 
 - Azure target: Web App for Containers.
 - Pipeline provisions missing ACR and App Service resources before deployment.
-- Service connection name: `sc-budgetin-check-api-azure`.
+- Non-prod service connection name: `sc-budgetin-check-api-azure`.
+- Prod service connection name: `sc-budgetin-check-api-azure-prod`.
 - Prod deployment is gated by the Azure DevOps environment `budgetin-check-api-prod`.
 
 ## Generated Artifacts

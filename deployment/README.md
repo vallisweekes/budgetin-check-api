@@ -21,7 +21,7 @@ deployment/azure-pipelines.yml
 
 Use these names so the YAML works without edits:
 
-- Non-prod service connection: `sc-budgetin-check-api-azure-dev`
+- Non-prod service connection: `sc-budgetin-check-api-azure`
 - Prod service connection: `sc-budgetin-check-api-azure-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
@@ -80,7 +80,7 @@ Recommended setup:
 
 1. In Azure DevOps, open Project settings > Service connections.
 2. Create an Azure Resource Manager service connection using workload identity federation.
-3. Create one connection for `VW-online-DEV` named `sc-budgetin-check-api-azure-dev` scoped to `rg-vw-budgetapp-api-dev-uks-001`.
+3. Use the existing connection for `VW-online-DEV` named `sc-budgetin-check-api-azure` scoped to `rg-vw-budgetapp-api-dev-uks-001`.
 4. Create one connection for `VW-online-PRD` named `sc-budgetin-check-api-azure-prod` scoped to `rg-vw-budgetapp-api-prd-uks-001`.
 5. Grant access permission to all pipelines on both connections.
 6. Give each service principal `Contributor` on its resource group so it can create ACR, App Service plans, and Web Apps.

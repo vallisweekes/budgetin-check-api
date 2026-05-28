@@ -34,10 +34,6 @@ steps:
         container_port='${{ parameters.containerPort }}'
         aspnetcore_environment='${{ parameters.aspNetCoreEnvironment }}'
 
-        az group create \
-          --name "$resource_group" \
-          --location "$location"
-
         if ! az appservice plan show --resource-group "$resource_group" --name "$app_service_plan" >/dev/null 2>&1; then
           az appservice plan create \
             --name "$app_service_plan" \

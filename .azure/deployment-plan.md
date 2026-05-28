@@ -31,7 +31,8 @@ Create an Azure DevOps CI/CD pipeline for the `BudgetinCheck.Api` .NET 8 web API
 
 - Azure App Service for Containers for the API.
 - Azure Container Registry for Docker images.
-- Separate resource groups for shared container registry, non-prod, and prod.
+- A single existing resource group, `DefaultResourceGroup-SUK`, because the Azure DevOps service connection is resource-group scoped.
+- Separate resources within that group for shared container registry, non-prod, and prod.
 - Separate App Service instances for non-prod and prod.
 - Separate App Service Plans for non-prod and prod.
 - Application settings configured per environment in Azure, not committed to source.
@@ -40,13 +41,13 @@ Create an Azure DevOps CI/CD pipeline for the `BudgetinCheck.Api` .NET 8 web API
 
 Shared:
 
-- Resource group: `rg-budgetin-check-api-shared`
+- Resource group: `DefaultResourceGroup-SUK`
 - Azure Container Registry: `crbudgetincheckapi`
 - Registry SKU: `Basic`
 
 Non-prod:
 
-- Resource group: `rg-budgetin-check-api-nonprod`
+- Resource group: `DefaultResourceGroup-SUK`
 - App Service: `app-budgetin-check-api-nonprod`
 - App Service Plan: `asp-budgetin-check-api-nonprod`
 - Runtime stack: Linux custom container
@@ -55,7 +56,7 @@ Non-prod:
 
 Prod:
 
-- Resource group: `rg-budgetin-check-api-prod`
+- Resource group: `DefaultResourceGroup-SUK`
 - App Service: `app-budgetin-check-api-prod`
 - App Service Plan: `asp-budgetin-check-api-prod`
 - Runtime stack: Linux custom container
@@ -69,9 +70,8 @@ Shared pipeline requirements:
 - Prod variable group: `budgetin-check-api-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
-- If the pipeline creates resource groups, the service connection needs subscription-level `Contributor`.
-- The service connection also needs `User Access Administrator` on the subscription or ACR scope to grant `AcrPull` to Web App managed identities.
-- If the resource groups are created manually, the service connection needs `Contributor` on all three resource groups plus `User Access Administrator` on the ACR scope.
+- The service connection needs `Contributor` on `DefaultResourceGroup-SUK`.
+- The service connection also needs `User Access Administrator` on `DefaultResourceGroup-SUK` or the ACR scope to grant `AcrPull` to Web App managed identities.
 
 ## Pipeline Plan
 

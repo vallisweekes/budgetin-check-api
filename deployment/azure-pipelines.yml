@@ -21,18 +21,20 @@ variables:
   imageRepository: budgetin-check-api
   containerPort: 8080
 
-  containerRegistryResourceGroupName: rg-budgetin-check-api-shared
+  azureResourceGroupName: DefaultResourceGroup-SUK
+
+  containerRegistryResourceGroupName: $(azureResourceGroupName)
   containerRegistryName: crbudgetincheckapi
   containerRegistryLoginServer: crbudgetincheckapi.azurecr.io
   containerRegistrySku: Basic
 
-  nonProdResourceGroupName: rg-budgetin-check-api-nonprod
+  nonProdResourceGroupName: $(azureResourceGroupName)
   nonProdAppServicePlanName: asp-budgetin-check-api-nonprod
   nonProdWebAppName: app-budgetin-check-api-nonprod
   nonProdAppServicePlanSku: B1
   nonProdImageTag: nonprod-$(Build.BuildId)
 
-  prodResourceGroupName: rg-budgetin-check-api-prod
+  prodResourceGroupName: $(azureResourceGroupName)
   prodAppServicePlanName: asp-budgetin-check-api-prod
   prodWebAppName: app-budgetin-check-api-prod
   prodAppServicePlanSku: B1

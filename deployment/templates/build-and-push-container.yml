@@ -30,10 +30,6 @@ steps:
         dockerfile_path='${{ parameters.dockerfilePath }}'
         docker_build_context='${{ parameters.dockerBuildContext }}'
 
-        az group create \
-          --name "$registry_group" \
-          --location "$location"
-
         if ! az acr show --resource-group "$registry_group" --name "$registry" >/dev/null 2>&1; then
           name_available=$(az acr check-name --name "$registry" --query nameAvailable -o tsv)
           if [[ "$name_available" != "true" ]]; then

@@ -29,15 +29,21 @@ Use these names so the YAML works without edits:
 
 ## Azure Resources The Pipeline Creates
 
+Your Azure DevOps service connection is scoped to this existing resource group:
+
+- Resource group: `DefaultResourceGroup-SUK`
+
+The pipeline creates all app resources inside that resource group.
+
 Shared container registry:
 
-- Resource group: `rg-budgetin-check-api-shared`
+- Resource group: `DefaultResourceGroup-SUK`
 - Azure Container Registry: `crbudgetincheckapi`
 - SKU: `Basic`
 
 Non-prod:
 
-- Resource group: `rg-budgetin-check-api-nonprod`
+- Resource group: `DefaultResourceGroup-SUK`
 - App Service plan: `asp-budgetin-check-api-nonprod`
 - Web App for Containers: `app-budgetin-check-api-nonprod`
 - Location: `uksouth`
@@ -45,7 +51,7 @@ Non-prod:
 
 Prod:
 
-- Resource group: `rg-budgetin-check-api-prod`
+- Resource group: `DefaultResourceGroup-SUK`
 - App Service plan: `asp-budgetin-check-api-prod`
 - Web App for Containers: `app-budgetin-check-api-prod`
 - Location: `uksouth`
@@ -61,16 +67,14 @@ Recommended setup:
 2. Create an Azure Resource Manager service connection using workload identity federation.
 3. Name it `sc-budgetin-check-api-azure`.
 4. Grant access permission to all pipelines.
-5. Give the service principal `Contributor` on the subscription so it can create resource groups, ACR, App Service plans, and Web Apps.
-6. Give the service principal `User Access Administrator` on the subscription or on the shared registry resource group so it can assign `AcrPull` to each Web App managed identity.
+5. Give the service principal `Contributor` on `DefaultResourceGroup-SUK` so it can create ACR, App Service plans, and Web Apps.
+6. Give the service principal `User Access Administrator` on `DefaultResourceGroup-SUK` so it can assign `AcrPull` to each Web App managed identity.
 
-If the resource groups are created manually first, the service principal needs `Contributor` on:
+The service principal needs access on:
 
-- `rg-budgetin-check-api-shared`
-- `rg-budgetin-check-api-nonprod`
-- `rg-budgetin-check-api-prod`
+- `DefaultResourceGroup-SUK`
 
-It still needs `User Access Administrator` on the ACR scope to create the managed identity pull permission.
+It still needs `User Access Administrator` on the resource group or ACR scope to create the managed identity pull permission.
 
 ## Variable Groups
 

@@ -136,6 +136,10 @@ bff.MapGet("/dashboard", LegacyProxyEndpoints.ProxyAsync)
     .WithName("GetDashboardProxy")
     .WithOpenApi();
 
+bff.MapGet("/dashboard/version", LegacyProxyEndpoints.ProxyAsync)
+    .WithName("GetDashboardVersionProxy")
+    .WithOpenApi();
+
 bff.MapGet("/income-month", IncomeMonthEndpoints.GetAsync)
     .WithName("GetIncomeMonth")
     .WithOpenApi();

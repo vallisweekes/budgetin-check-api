@@ -33,12 +33,20 @@ variables:
   nonProdWebAppName: app-budgetin-check-api-nonprod
   nonProdAppServicePlanSku: B1
   nonProdImageTag: nonprod-$(Build.BuildId)
+  nonProdBudgetDbConnectionString: ''
+  nonProdLegacyNextJsBaseUrl: ''
+  nonProdLegacyNextJsTimeoutSeconds: 100
+  nonProdBudgetDataSpendingDataRoot: ''
 
   prodResourceGroupName: $(azureResourceGroupName)
   prodAppServicePlanName: asp-budgetin-check-api-prod
   prodWebAppName: app-budgetin-check-api-prod
   prodAppServicePlanSku: B1
   prodImageTag: prod-$(Build.BuildId)
+  prodBudgetDbConnectionString: ''
+  prodLegacyNextJsBaseUrl: ''
+  prodLegacyNextJsTimeoutSeconds: 100
+  prodBudgetDataSpendingDataRoot: ''
 
 stages:
   - stage: Validate
@@ -96,7 +104,6 @@ stages:
     dependsOn: Build_NonProd
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
     variables:
-      - group: budgetin-check-api-nonprod
       - name: resourceGroupName
         value: $(nonProdResourceGroupName)
       - name: appServicePlanName
@@ -109,6 +116,14 @@ stages:
         value: $(containerRegistryLoginServer)/$(imageRepository):$(nonProdImageTag)
       - name: aspNetCoreEnvironment
         value: Development
+      - name: BudgetDbConnectionString
+        value: $(nonProdBudgetDbConnectionString)
+      - name: LegacyNextJsBaseUrl
+        value: $(nonProdLegacyNextJsBaseUrl)
+      - name: LegacyNextJsTimeoutSeconds
+        value: $(nonProdLegacyNextJsTimeoutSeconds)
+      - name: BudgetDataSpendingDataRoot
+        value: $(nonProdBudgetDataSpendingDataRoot)
     jobs:
       - deployment: DeployNonProd
         displayName: Deploy non-prod Web App for Containers
@@ -162,7 +177,6 @@ stages:
     dependsOn: Build_Prod
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     variables:
-      - group: budgetin-check-api-prod
       - name: resourceGroupName
         value: $(prodResourceGroupName)
       - name: appServicePlanName
@@ -175,6 +189,14 @@ stages:
         value: $(containerRegistryLoginServer)/$(imageRepository):$(prodImageTag)
       - name: aspNetCoreEnvironment
         value: Production
+      - name: BudgetDbConnectionString
+        value: $(prodBudgetDbConnectionString)
+      - name: LegacyNextJsBaseUrl
+        value: $(prodLegacyNextJsBaseUrl)
+      - name: LegacyNextJsTimeoutSeconds
+        value: $(prodLegacyNextJsTimeoutSeconds)
+      - name: BudgetDataSpendingDataRoot
+        value: $(prodBudgetDataSpendingDataRoot)
     jobs:
       - deployment: DeployProd
         displayName: Deploy prod Web App for Containers

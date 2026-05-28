@@ -66,10 +66,9 @@ Prod:
 Shared pipeline requirements:
 
 - Azure DevOps service connection: `sc-budgetin-check-api-azure`
-- Non-prod variable group: `budgetin-check-api-nonprod`
-- Prod variable group: `budgetin-check-api-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
+- Runtime configuration is provided through Azure DevOps pipeline variables, not required variable groups.
 - The service connection needs `Contributor` on `DefaultResourceGroup-SUK`.
 - The service connection also needs `User Access Administrator` on `DefaultResourceGroup-SUK` or the ACR scope to grant `AcrPull` to Web App managed identities.
 

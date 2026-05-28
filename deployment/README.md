@@ -22,8 +22,6 @@ deployment/azure-pipelines.yml
 Use these names so the YAML works without edits:
 
 - Service connection: `sc-budgetin-check-api-azure`
-- Non-prod variable group: `budgetin-check-api-nonprod`
-- Prod variable group: `budgetin-check-api-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
 
@@ -76,18 +74,29 @@ The service principal needs access on:
 
 It still needs `User Access Administrator` on the resource group or ACR scope to create the managed identity pull permission.
 
-## Variable Groups
+## Pipeline Variables
 
-Create both variable groups in Azure DevOps Pipelines > Library and authorize them for this pipeline.
+The YAML includes empty defaults so the pipeline can compile before secrets are added. Add these variables in Azure DevOps from the pipeline page: Edit > Variables.
 
-Each variable group needs these variables:
+Non-prod variables:
 
 | Variable | Secret | Notes |
 | --- | --- | --- |
-| `BudgetDbConnectionString` | Yes | PostgreSQL connection string for `ConnectionStrings__BudgetDb`. |
-| `LegacyNextJsBaseUrl` | No | Legacy BFF base URL used by the migration proxy and auth bridge. |
-| `LegacyNextJsTimeoutSeconds` | No | Use `100` unless you need a different timeout. |
-| `BudgetDataSpendingDataRoot` | No | Path for legacy spending JSON data. Use an empty value if not needed. |
+| `nonProdBudgetDbConnectionString` | Yes | PostgreSQL connection string for `ConnectionStrings__BudgetDb`. |
+| `nonProdLegacyNextJsBaseUrl` | No | Legacy BFF base URL used by the migration proxy and auth bridge. |
+| `nonProdLegacyNextJsTimeoutSeconds` | No | Use `100` unless you need a different timeout. |
+| `nonProdBudgetDataSpendingDataRoot` | No | Path for legacy spending JSON data. Use an empty value if not needed. |
+
+Prod variables:
+
+| Variable | Secret | Notes |
+| --- | --- | --- |
+| `prodBudgetDbConnectionString` | Yes | PostgreSQL connection string for `ConnectionStrings__BudgetDb`. |
+| `prodLegacyNextJsBaseUrl` | No | Legacy BFF base URL used by the migration proxy and auth bridge. |
+| `prodLegacyNextJsTimeoutSeconds` | No | Use `100` unless you need a different timeout. |
+| `prodBudgetDataSpendingDataRoot` | No | Path for legacy spending JSON data. Use an empty value if not needed. |
+
+Variable groups are optional. If you prefer them later, create groups and re-add them to the deploy stages, but they are not required for this pipeline to be valid.
 
 ## Production Approval
 

@@ -30,6 +30,16 @@ steps:
         dockerfile_path='${{ parameters.dockerfilePath }}'
         docker_build_context='${{ parameters.dockerBuildContext }}'
 
+        container_registry_provider_state=$(az provider show \
+          --namespace Microsoft.ContainerRegistry \
+          --query registrationState \
+          -o tsv 2>/dev/null || true)
+
+        if [[ "$container_registry_provider_state" != "Registered" ]]; then
+          echo "##vso[task.logissue type=error]Azure resource provider Microsoft.ContainerRegistry is not registered for this subscription. Register it once from Azure Portal > Subscriptions > Resource providers, or run: az provider register --namespace Microsoft.ContainerRegistry"
+          exit 1
+        fi
+
         if ! az acr show --resource-group "$registry_group" --name "$registry" >/dev/null 2>&1; then
           name_available=$(az acr check-name --name "$registry" --query nameAvailable -o tsv)
           if [[ "$name_available" != "true" ]]; then

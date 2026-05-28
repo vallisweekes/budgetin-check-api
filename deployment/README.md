@@ -74,6 +74,28 @@ The service principal needs access on:
 
 It still needs `User Access Administrator` on the resource group or ACR scope to create the managed identity pull permission.
 
+## Required Azure Resource Providers
+
+Before the first deployment, register these providers on the subscription:
+
+```text
+Microsoft.ContainerRegistry
+Microsoft.Web
+Microsoft.ManagedIdentity
+```
+
+In Azure Portal, open Subscriptions > your subscription > Resource providers, search each provider, and select Register.
+
+With Azure CLI, a subscription owner or contributor can run:
+
+```bash
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.Web
+az provider register --namespace Microsoft.ManagedIdentity
+```
+
+Registration can take a few minutes. The pipeline includes preflight checks that stop with a clear message if a provider is still not registered.
+
 ## Pipeline Variables
 
 The YAML includes empty defaults so the pipeline can compile before secrets are added. Add these variables in Azure DevOps from the pipeline page: Edit > Variables.

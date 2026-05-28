@@ -71,6 +71,7 @@ Shared pipeline requirements:
 - Runtime configuration is provided through Azure DevOps pipeline variables, not required variable groups.
 - The service connection needs `Contributor` on `DefaultResourceGroup-SUK`.
 - The service connection also needs `User Access Administrator` on `DefaultResourceGroup-SUK` or the ACR scope to grant `AcrPull` to Web App managed identities.
+- The subscription must have these resource providers registered before first deployment: `Microsoft.ContainerRegistry`, `Microsoft.Web`, and `Microsoft.ManagedIdentity`.
 
 ## Pipeline Plan
 

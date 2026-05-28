@@ -34,6 +34,18 @@ steps:
         container_port='${{ parameters.containerPort }}'
         aspnetcore_environment='${{ parameters.aspNetCoreEnvironment }}'
 
+        for provider_namespace in Microsoft.Web Microsoft.ManagedIdentity; do
+          provider_state=$(az provider show \
+            --namespace "$provider_namespace" \
+            --query registrationState \
+            -o tsv 2>/dev/null || true)
+
+          if [[ "$provider_state" != "Registered" ]]; then
+            echo "##vso[task.logissue type=error]Azure resource provider $provider_namespace is not registered for this subscription. Register it once from Azure Portal > Subscriptions > Resource providers, or run: az provider register --namespace $provider_namespace"
+            exit 1
+          fi
+        done
+
         if ! az appservice plan show --resource-group "$resource_group" --name "$app_service_plan" >/dev/null 2>&1; then
           az appservice plan create \
             --name "$app_service_plan" \

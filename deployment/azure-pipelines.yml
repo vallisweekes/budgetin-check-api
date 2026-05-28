@@ -11,7 +11,6 @@ pr:
       - main
 
 variables:
-  azureServiceConnection: sc-budgetin-check-api-azure
   azureLocation: uksouth
   dotNetSdkVersion: 8.x
   buildConfiguration: Release
@@ -21,14 +20,13 @@ variables:
   imageRepository: budgetin-check-api
   containerPort: 8080
 
-  azureResourceGroupName: DefaultResourceGroup-SUK
-
-  containerRegistryResourceGroupName: $(azureResourceGroupName)
-  containerRegistryName: crbudgetincheckapi
-  containerRegistryLoginServer: crbudgetincheckapi.azurecr.io
   containerRegistrySku: Basic
 
-  nonProdResourceGroupName: $(azureResourceGroupName)
+  nonProdAzureServiceConnection: sc-budgetin-check-api-azure-dev
+  nonProdResourceGroupName: rg-vw-budgetapp-api-dev-uks-001
+  nonProdContainerRegistryResourceGroupName: $(nonProdResourceGroupName)
+  nonProdContainerRegistryName: crvwbudgetappapidevuks001
+  nonProdContainerRegistryLoginServer: crvwbudgetappapidevuks001.azurecr.io
   nonProdAppServicePlanName: asp-budgetin-check-api-nonprod
   nonProdWebAppName: app-budgetin-check-api-nonprod
   nonProdAppServicePlanSku: B1
@@ -38,7 +36,11 @@ variables:
   nonProdLegacyNextJsTimeoutSeconds: 100
   nonProdBudgetDataSpendingDataRoot: ''
 
-  prodResourceGroupName: $(azureResourceGroupName)
+  prodAzureServiceConnection: sc-budgetin-check-api-azure-prod
+  prodResourceGroupName: rg-vw-budgetapp-api-prd-uks-001
+  prodContainerRegistryResourceGroupName: $(prodResourceGroupName)
+  prodContainerRegistryName: crvwbudgetappapiprduks001
+  prodContainerRegistryLoginServer: crvwbudgetappapiprduks001.azurecr.io
   prodAppServicePlanName: asp-budgetin-check-api-prod
   prodWebAppName: app-budgetin-check-api-prod
   prodAppServicePlanSku: B1
@@ -88,10 +90,10 @@ stages:
         steps:
           - template: templates/build-and-push-container.yml
             parameters:
-              azureServiceConnection: $(azureServiceConnection)
+              azureServiceConnection: $(nonProdAzureServiceConnection)
               azureLocation: $(azureLocation)
-              containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
-              containerRegistryName: $(containerRegistryName)
+              containerRegistryResourceGroupName: $(nonProdContainerRegistryResourceGroupName)
+              containerRegistryName: $(nonProdContainerRegistryName)
               containerRegistrySku: $(containerRegistrySku)
               imageRepository: $(imageRepository)
               imageTag: $(nonProdImageTag)
@@ -113,7 +115,7 @@ stages:
       - name: appServicePlanSku
         value: $(nonProdAppServicePlanSku)
       - name: containerImage
-        value: $(containerRegistryLoginServer)/$(imageRepository):$(nonProdImageTag)
+        value: $(nonProdContainerRegistryLoginServer)/$(imageRepository):$(nonProdImageTag)
       - name: aspNetCoreEnvironment
         value: Development
       - name: BudgetDbConnectionString
@@ -136,11 +138,11 @@ stages:
               steps:
                 - template: templates/provision-container-webapp.yml
                   parameters:
-                    azureServiceConnection: $(azureServiceConnection)
+                    azureServiceConnection: $(nonProdAzureServiceConnection)
                     azureLocation: $(azureLocation)
-                    containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
-                    containerRegistryName: $(containerRegistryName)
-                    containerRegistryLoginServer: $(containerRegistryLoginServer)
+                    containerRegistryResourceGroupName: $(nonProdContainerRegistryResourceGroupName)
+                    containerRegistryName: $(nonProdContainerRegistryName)
+                    containerRegistryLoginServer: $(nonProdContainerRegistryLoginServer)
                     resourceGroupName: $(resourceGroupName)
                     appServicePlanName: $(appServicePlanName)
                     appServicePlanSku: $(appServicePlanSku)
@@ -161,10 +163,10 @@ stages:
         steps:
           - template: templates/build-and-push-container.yml
             parameters:
-              azureServiceConnection: $(azureServiceConnection)
+              azureServiceConnection: $(prodAzureServiceConnection)
               azureLocation: $(azureLocation)
-              containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
-              containerRegistryName: $(containerRegistryName)
+              containerRegistryResourceGroupName: $(prodContainerRegistryResourceGroupName)
+              containerRegistryName: $(prodContainerRegistryName)
               containerRegistrySku: $(containerRegistrySku)
               imageRepository: $(imageRepository)
               imageTag: $(prodImageTag)
@@ -186,7 +188,7 @@ stages:
       - name: appServicePlanSku
         value: $(prodAppServicePlanSku)
       - name: containerImage
-        value: $(containerRegistryLoginServer)/$(imageRepository):$(prodImageTag)
+        value: $(prodContainerRegistryLoginServer)/$(imageRepository):$(prodImageTag)
       - name: aspNetCoreEnvironment
         value: Production
       - name: BudgetDbConnectionString
@@ -209,11 +211,11 @@ stages:
               steps:
                 - template: templates/provision-container-webapp.yml
                   parameters:
-                    azureServiceConnection: $(azureServiceConnection)
+                    azureServiceConnection: $(prodAzureServiceConnection)
                     azureLocation: $(azureLocation)
-                    containerRegistryResourceGroupName: $(containerRegistryResourceGroupName)
-                    containerRegistryName: $(containerRegistryName)
-                    containerRegistryLoginServer: $(containerRegistryLoginServer)
+                    containerRegistryResourceGroupName: $(prodContainerRegistryResourceGroupName)
+                    containerRegistryName: $(prodContainerRegistryName)
+                    containerRegistryLoginServer: $(prodContainerRegistryLoginServer)
                     resourceGroupName: $(resourceGroupName)
                     appServicePlanName: $(appServicePlanName)
                     appServicePlanSku: $(appServicePlanSku)

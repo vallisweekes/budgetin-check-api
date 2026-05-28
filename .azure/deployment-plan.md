@@ -31,32 +31,41 @@ Create an Azure DevOps CI/CD pipeline for the `BudgetinCheck.Api` .NET 8 web API
 
 - Azure App Service for Containers for the API.
 - Azure Container Registry for Docker images.
-- A single existing resource group, `DefaultResourceGroup-SUK`, because the Azure DevOps service connection is resource-group scoped.
-- Separate resources within that group for shared container registry, non-prod, and prod.
+- Separate Azure subscriptions for non-prod and prod.
+- Separate resource-group-scoped Azure DevOps service connections for non-prod and prod.
+- Separate container registries in the non-prod and prod subscriptions.
 - Separate App Service instances for non-prod and prod.
 - Separate App Service Plans for non-prod and prod.
 - Application settings configured per environment in Azure, not committed to source.
 
 ## Resource Group Requirements
 
-Shared:
+Non-prod subscription:
 
-- Resource group: `DefaultResourceGroup-SUK`
-- Azure Container Registry: `crbudgetincheckapi`
-- Registry SKU: `Basic`
+- Subscription: `VW-online-DEV`
+- Subscription ID: `4800dc47-952e-4b26-b167-fd8c671101e8`
+- Resource group: `rg-vw-budgetapp-api-dev-uks-001`
 
 Non-prod:
 
-- Resource group: `DefaultResourceGroup-SUK`
+- Resource group: `rg-vw-budgetapp-api-dev-uks-001`
+- Azure Container Registry: `crvwbudgetappapidevuks001`
 - App Service: `app-budgetin-check-api-nonprod`
 - App Service Plan: `asp-budgetin-check-api-nonprod`
 - Runtime stack: Linux custom container
 - Location: `uksouth`
 - SKU: `B1`
 
+Prod subscription:
+
+- Subscription: `VW-online-PRD`
+- Subscription ID: `366cfc3b-1e2c-4708-a880-35380b4202ba`
+- Resource group: `rg-vw-budgetapp-api-prd-uks-001`
+
 Prod:
 
-- Resource group: `DefaultResourceGroup-SUK`
+- Resource group: `rg-vw-budgetapp-api-prd-uks-001`
+- Azure Container Registry: `crvwbudgetappapiprduks001`
 - App Service: `app-budgetin-check-api-prod`
 - App Service Plan: `asp-budgetin-check-api-prod`
 - Runtime stack: Linux custom container
@@ -65,13 +74,14 @@ Prod:
 
 Shared pipeline requirements:
 
-- Azure DevOps service connection: `sc-budgetin-check-api-azure`
+- Non-prod Azure DevOps service connection: `sc-budgetin-check-api-azure-dev`
+- Prod Azure DevOps service connection: `sc-budgetin-check-api-azure-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
 - Runtime configuration is provided through Azure DevOps pipeline variables, not required variable groups.
-- The service connection needs `Contributor` on `DefaultResourceGroup-SUK`.
-- The service connection also needs `User Access Administrator` on `DefaultResourceGroup-SUK` or the ACR scope to grant `AcrPull` to Web App managed identities.
-- The subscription must have these resource providers registered before first deployment: `Microsoft.ContainerRegistry`, `Microsoft.Web`, and `Microsoft.ManagedIdentity`.
+- Each service connection needs `Contributor` on its environment resource group.
+- Each service connection also needs `User Access Administrator` on its environment resource group or ACR scope to grant `AcrPull` to Web App managed identities.
+- Both subscriptions must have these resource providers registered before first deployment: `Microsoft.ContainerRegistry`, `Microsoft.Web`, and `Microsoft.ManagedIdentity`.
 
 ## Pipeline Plan
 

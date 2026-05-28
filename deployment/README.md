@@ -21,41 +21,58 @@ deployment/azure-pipelines.yml
 
 Use these names so the YAML works without edits:
 
-- Service connection: `sc-budgetin-check-api-azure`
+- Non-prod service connection: `sc-budgetin-check-api-azure-dev`
+- Prod service connection: `sc-budgetin-check-api-azure-prod`
 - Non-prod environment: `budgetin-check-api-nonprod`
 - Prod environment: `budgetin-check-api-prod`
 
 ## Azure Resources The Pipeline Creates
 
-Your Azure DevOps service connection is scoped to this existing resource group:
+This deployment uses separate Azure subscriptions for non-prod and prod.
 
-- Resource group: `DefaultResourceGroup-SUK`
+Non-prod subscription:
 
-The pipeline creates all app resources inside that resource group.
+- Subscription: `VW-online-DEV`
+- Subscription ID: `4800dc47-952e-4b26-b167-fd8c671101e8`
+- Resource group: `rg-vw-budgetapp-api-dev-uks-001`
 
-Shared container registry:
+Prod subscription:
 
-- Resource group: `DefaultResourceGroup-SUK`
-- Azure Container Registry: `crbudgetincheckapi`
+- Subscription: `VW-online-PRD`
+- Subscription ID: `366cfc3b-1e2c-4708-a880-35380b4202ba`
+- Resource group: `rg-vw-budgetapp-api-prd-uks-001`
+
+The pipeline creates app resources inside each environment's API resource group.
+
+Non-prod container registry:
+
+- Resource group: `rg-vw-budgetapp-api-dev-uks-001`
+- Azure Container Registry: `crvwbudgetappapidevuks001`
 - SKU: `Basic`
 
 Non-prod:
 
-- Resource group: `DefaultResourceGroup-SUK`
+- Resource group: `rg-vw-budgetapp-api-dev-uks-001`
 - App Service plan: `asp-budgetin-check-api-nonprod`
 - Web App for Containers: `app-budgetin-check-api-nonprod`
 - Location: `uksouth`
 - SKU: `B1`
 
+Prod container registry:
+
+- Resource group: `rg-vw-budgetapp-api-prd-uks-001`
+- Azure Container Registry: `crvwbudgetappapiprduks001`
+- SKU: `Basic`
+
 Prod:
 
-- Resource group: `DefaultResourceGroup-SUK`
+- Resource group: `rg-vw-budgetapp-api-prd-uks-001`
 - App Service plan: `asp-budgetin-check-api-prod`
 - Web App for Containers: `app-budgetin-check-api-prod`
 - Location: `uksouth`
 - SKU: `B1`
 
-ACR names are globally unique. If `crbudgetincheckapi` is unavailable in Azure, change `containerRegistryName` and `containerRegistryLoginServer` in [azure-pipelines.yml](azure-pipelines.yml).
+ACR names are globally unique. If either registry name is unavailable in Azure, change the matching registry name and login server variables in [azure-pipelines.yml](azure-pipelines.yml).
 
 ## Service Connection Permissions
 
@@ -63,14 +80,19 @@ Recommended setup:
 
 1. In Azure DevOps, open Project settings > Service connections.
 2. Create an Azure Resource Manager service connection using workload identity federation.
-3. Name it `sc-budgetin-check-api-azure`.
-4. Grant access permission to all pipelines.
-5. Give the service principal `Contributor` on `DefaultResourceGroup-SUK` so it can create ACR, App Service plans, and Web Apps.
-6. Give the service principal `User Access Administrator` on `DefaultResourceGroup-SUK` so it can assign `AcrPull` to each Web App managed identity.
+3. Create one connection for `VW-online-DEV` named `sc-budgetin-check-api-azure-dev` scoped to `rg-vw-budgetapp-api-dev-uks-001`.
+4. Create one connection for `VW-online-PRD` named `sc-budgetin-check-api-azure-prod` scoped to `rg-vw-budgetapp-api-prd-uks-001`.
+5. Grant access permission to all pipelines on both connections.
+6. Give each service principal `Contributor` on its resource group so it can create ACR, App Service plans, and Web Apps.
+7. Give each service principal `User Access Administrator` on its resource group so it can assign `AcrPull` to each Web App managed identity.
 
-The service principal needs access on:
+The non-prod service principal needs access on:
 
-- `DefaultResourceGroup-SUK`
+- `rg-vw-budgetapp-api-dev-uks-001`
+
+The prod service principal needs access on:
+
+- `rg-vw-budgetapp-api-prd-uks-001`
 
 It still needs `User Access Administrator` on the resource group or ACR scope to create the managed identity pull permission.
 
